@@ -55,21 +55,6 @@ pub fn get_move(_game: &Game, turn: &u32, board: &Board, you: &Battlesnake) -> V
 
     // We've included code to prevent your Battlesnake from moving backwards
     let my_head = &you.body[0]; // Coordinates of your head
-    let my_neck = &you.body[1]; // Coordinates of your "neck"
-
-    if my_neck.x < my_head.x {
-        // Neck is left of head, don't move left
-        safe_moves.insert(Direction::Left, false);
-    } else if my_neck.x > my_head.x {
-        // Neck is right of head, don't move right
-        safe_moves.insert(Direction::Right, false);
-    } else if my_neck.y < my_head.y {
-        // Neck is below head, don't move down
-        safe_moves.insert(Direction::Down, false);
-    } else if my_neck.y > my_head.y {
-        // Neck is above head, don't move up
-        safe_moves.insert(Direction::Up, false);
-    }
 
     // Prevent your Battlesnake from moving out of bounds
     let board_width = &board.width;
@@ -87,8 +72,27 @@ pub fn get_move(_game: &Game, turn: &u32, board: &Board, you: &Battlesnake) -> V
         safe_moves.insert(Direction::Down, false);
     }
 
-    // TODO: Step 2 - Prevent your Battlesnake from colliding with itself
-    // let my_body = &you.body;
+    // Prevent your Battlesnake from colliding with itself
+    let my_body = &you.body;
+    for part in my_body {
+        let right_of_part = Coord{x: part.x + 1, y: part.y};
+        let above_of_part = Coord{x: part.x, y: part.y + 1};
+        let right_of_head = Coord{x: my_head.x + 1, y: my_head.y};
+        let above_of_head = Coord{x: my_head.x, y: my_head.y + 1};
+
+        if my_head == &right_of_part {
+            safe_moves.insert(Direction::Left, false);
+        }
+        if part == &right_of_head {
+            safe_moves.insert(Direction::Right, false);
+        }
+        if my_head == &above_of_part {
+            safe_moves.insert(Direction::Down, false);
+        }
+        if part == &above_of_head {
+            safe_moves.insert(Direction::Up, false);
+        }
+    }
 
     // TODO: Step 3 - Prevent your Battlesnake from colliding with other Battlesnakes
     // let opponents = &board.snakes;
