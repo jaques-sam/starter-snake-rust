@@ -1,14 +1,14 @@
-#[macro_use]
-extern crate rocket;
-
-use log::info;
-use rocket::fairing::AdHoc;
-use rocket::http::Status;
-use rocket::serde::{json::Json, Deserialize};
-use serde::Serialize;
-use serde_json::{Value};
+use axum::{
+    http::StatusCode,
+    response::IntoResponse,
+    routing::{get, post},
+    Json, Router,
+};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::HashMap;
-use std::env;
+use std::net::SocketAddr;
+use tracing::instrument;
 
 mod logic;
 
@@ -57,13 +57,12 @@ pub struct GameState {
     you: Battlesnake,
 }
 
-#[get("/")]
-fn handle_index() -> Json<Value> {
+#[instrument]
+async fn handle_index() -> Json<Value> {
     Json(logic::info())
 }
 
-#[post("/start", format = "json", data = "<start_req>")]
-fn handle_start(start_req: Json<GameState>) -> Status {
+async fn handle_start(Json(start_req): Json<GameState>) -> impl IntoResponse {
     logic::start(
         &start_req.game,
         &start_req.turn,
@@ -71,11 +70,10 @@ fn handle_start(start_req: Json<GameState>) -> Status {
         &start_req.you,
     );
 
-    Status::Ok
+    StatusCode::OK
 }
 
-#[post("/move", format = "json", data = "<move_req>")]
-fn handle_move(move_req: Json<GameState>) -> Json<Value> {
+async fn handle_move(Json(move_req): Json<GameState>) -> impl IntoResponse {
     let response = logic::get_move(
         &move_req.game,
         &move_req.turn,
@@ -83,43 +81,39 @@ fn handle_move(move_req: Json<GameState>) -> Json<Value> {
         &move_req.you,
     );
 
-    Json(response)
+    (StatusCode::OK, Json(response))
 }
 
-#[post("/end", format = "json", data = "<end_req>")]
-fn handle_end(end_req: Json<GameState>) -> Status {
+async fn handle_end(Json(end_req): Json<GameState>) {
     logic::end(&end_req.game, &end_req.turn, &end_req.board, &end_req.you);
-
-    Status::Ok
 }
 
-#[launch]
-fn rocket() -> _ {
-    // Lots of web hosting services expect you to bind to the port specified by the `PORT`
-    // environment variable. However, Rocket looks at the `ROCKET_PORT` environment variable.
-    // If we find a value for `PORT`, we set `ROCKET_PORT` to that value.
-    if let Ok(port) = env::var("PORT") {
-        env::set_var("ROCKET_PORT", &port);
-    }
+#[tokio::main]
+async fn main() {
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .init();
 
-    // We default to 'info' level logging. But if the `RUST_LOG` environment variable is set,
-    // we keep that value instead.
-    if env::var("RUST_LOG").is_err() {
-        env::set_var("RUST_LOG", "info");
-    }
+    tracing::info!("Starting Battlesnake Server...");
 
-    env_logger::init();
+    let app = Router::new()
+        .route("/", get(handle_index))
+        .route("/start", post(handle_start))
+        .route("/move", post(handle_move))
+        .route("/end", post(handle_end));
 
-    info!("Starting Battlesnake Server...");
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8000));
+    tracing::debug!("listening on {}", addr);
+    axum::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 
-    rocket::build()
-        .attach(AdHoc::on_response("Server ID Middleware", |_, res| {
-            Box::pin(async move {
-                res.set_raw_header("Server", "battlesnake/github/starter-snake-rust");
-            })
-        }))
-        .mount(
-            "/",
-            routes![handle_index, handle_start, handle_move, handle_end],
-        )
+    // TODO: convert to axum
+    // rocket::build()
+    // .attach(AdHoc::on_response("Server ID Middleware", |_, res| {
+    //     Box::pin(async move {
+    //         res.set_raw_header("Server", "battlesnake/github/starter-snake-rust");
+    //     })
+    // }))
 }

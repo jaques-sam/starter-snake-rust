@@ -5,7 +5,7 @@
 //  |    |   \ / __ \|  |  |  | |  |_\  ___/ \___ \|   |  \/ __ \|    <\  ___/
 //  |________/(______/__|  |__| |____/\_____>______>___|__(______/__|__\\_____>
 
-use log::info;
+use tracing::info;
 use rand::seq::SliceRandom;
 use serde_json::{json, Value};
 use std::collections::HashMap;
@@ -40,6 +40,12 @@ pub fn end(_game: &Game, _turn: &u32, _board: &Board, _you: &Battlesnake) {
     info!("GAME OVER");
 }
 
+// #[derive(Deserialize, Serialize, Debug)]
+// struct MoveResult {
+//     nextMove: String,
+//     shout: String,
+// }
+
 // move is called on every turn and returns your next move
 // Valid moves are "up", "down", "left", or "right"
 // See https://docs.battlesnake.com/api/example-move for available data
@@ -55,6 +61,7 @@ pub fn get_move(_game: &Game, turn: &u32, board: &Board, you: &Battlesnake) -> V
 
     // We've included code to prevent your Battlesnake from moving backwards
     let my_head = &you.body[0]; // Coordinates of your head
+    info!("### my_head {:?}", my_head);
 
     // Prevent your Battlesnake from moving out of bounds
     let board_width = &board.width;
@@ -103,7 +110,11 @@ pub fn get_move(_game: &Game, turn: &u32, board: &Board, you: &Battlesnake) -> V
         .filter(|&(_, v)| v)
         .map(|(k, _)| k)
         .collect::<Vec<_>>();
-    
+
+    if safe_moves.is_empty() {
+        return json!({ "move": "down", "shout": "Oops, congratz! Z u laterz aligatorz!!" });
+    }
+
     // Choose a random move from the safe ones
     let chosen = safe_moves.choose(&mut rand::thread_rng()).unwrap();
 

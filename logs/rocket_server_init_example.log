@@ -1,0 +1,30 @@
+❯ cargo run
+   Compiling starter-snake-rust v1.0.0 (/home/samja/repos/own/starter-snake-rust)
+    Finished dev [unoptimized + debuginfo] target(s) in 5.59s
+     Running `target/debug/starter-snake-rust`
+[2022-12-29T08:18:32Z INFO  starter_snake_rust] Starting Battlesnake Server...
+[2022-12-29T08:18:32Z WARN  rocket::launch] 🔧 Configured for debug.
+[2022-12-29T08:18:32Z WARN  rocket::launch_] address: 0.0.0.0
+[2022-12-29T08:18:32Z WARN  rocket::launch_] port: 8000
+[2022-12-29T08:18:32Z WARN  rocket::launch_] workers: 8
+[2022-12-29T08:18:32Z WARN  rocket::launch_] ident: Rocket
+[2022-12-29T08:18:32Z WARN  rocket::launch_] keep-alive: disabled
+[2022-12-29T08:18:32Z WARN  rocket::launch_] limits: bytes = 8KiB, data-form = 2MiB, file = 1MiB, form = 32KiB, json = 1MiB, msgpack = 1MiB, string = 8KiB
+[2022-12-29T08:18:32Z WARN  rocket::launch_] tls: disabled
+[2022-12-29T08:18:32Z WARN  rocket::launch_] temp dir: /tmp
+[2022-12-29T08:18:32Z WARN  rocket::launch_] log level: normal
+[2022-12-29T08:18:32Z WARN  rocket::launch_] cli colors: true
+[2022-12-29T08:18:32Z WARN  rocket::launch_] shutdown: ctrlc = true, force = true, signals = [SIGTERM], grace = 2s, mercy = 3s
+[2022-12-29T08:18:32Z WARN  rocket::launch] 🛰  Routes:
+[2022-12-29T08:18:32Z WARN  rocket::launch_] (handle_index) GET /
+[2022-12-29T08:18:32Z WARN  rocket::launch_] (handle_end) POST /end application/json
+[2022-12-29T08:18:32Z WARN  rocket::launch_] (handle_move) POST /move application/json
+[2022-12-29T08:18:32Z WARN  rocket::launch_] (handle_start) POST /start application/json
+[2022-12-29T08:18:32Z WARN  rocket::launch] 📡 Fairings:
+[2022-12-29T08:18:32Z WARN  rocket::launch_] Shield (liftoff, response, singleton)
+[2022-12-29T08:18:32Z WARN  rocket::launch_] Server ID Middleware (response)
+[2022-12-29T08:18:32Z INFO  rocket::shield::shield] 🛡️ Shield:
+[2022-12-29T08:18:32Z INFO  _] X-Content-Type-Options: nosniff
+[2022-12-29T08:18:32Z INFO  _] X-Frame-Options: SAMEORIGIN
+[2022-12-29T08:18:32Z INFO  _] Permissions-Policy: interest-cohort=()
+[2022-12-29T08:18:32Z WARN  rocket::launch] 🚀 Rocket has launched from http://0.0.0.0:8000
